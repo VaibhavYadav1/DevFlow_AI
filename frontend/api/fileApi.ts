@@ -2,7 +2,7 @@ import { BASE_URL } from "./config"
 
 export async function uploadZip(projectName: string, file: File) {
     const formData = new FormData();
-    formData.append("project_name", projectName)
+    formData.append("project_name", projectName.trim())
     formData.append("file", file);
 
     const res = await fetch(`${BASE_URL}/upload-zip`, {
@@ -16,6 +16,16 @@ export async function uploadZip(projectName: string, file: File) {
 export async function getStatus(taskId: string) {
 
     const res = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+        method: "Get",
+    })
+
+    return res.json();
+
+}
+
+export async function getASTCode(parsedId: string) {
+
+    const res = await fetch(`${BASE_URL}/ast_parser/${parsedId}`, {
         method: "Get",
     })
 

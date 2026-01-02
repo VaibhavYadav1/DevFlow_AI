@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    parserId: null,
+    parsed_id: null,
     document: null,
     diagram: null
 }
@@ -11,7 +11,7 @@ export const fileSlicer = createSlice({
     initialState,
     reducers: {
         setParserID : (state, action) => {
-            state.parserId = action.payload;
+            state.parsed_id = action.payload;
         },
         setDocument: (state, action) => {
             state.document = action.payload

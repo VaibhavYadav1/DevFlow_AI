@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, Request, Form
 from uuid import uuid4
 import os
 import aiofiles
@@ -90,7 +90,7 @@ async def _bg_parse_repo(app, task_id, project_name, zip_path):
         })
         
 @app.post("/upload-zip")
-async def upload_zip_file(request: Request, background_task: BackgroundTasks, file: UploadFile = File(...), project_name: str = None) -> None:
+async def upload_zip_file(request: Request, background_task: BackgroundTasks, file: UploadFile = File(...), project_name: str = Form(...)) -> None:
 
     filename = file.filename
 
