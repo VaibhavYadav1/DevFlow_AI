@@ -40,6 +40,7 @@ export default function UploadBox() {
         if (!taskId)
             return
 
+        // eslint-disable-next-line prefer-const
         let intervalId: NodeJS.Timeout;
 
         const pollStatus = async () => {
@@ -67,7 +68,7 @@ export default function UploadBox() {
     }, [taskId])
 
     return (
-        <div className="max-w-2xl mx-auto mt-10 p-6">
+        <div className="mx-auto mt-10 p-6">
             <h1 className="text-2xl font-semibold mb-6">
                 📦 Upload Project
             </h1>

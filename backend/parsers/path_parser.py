@@ -5,9 +5,9 @@ from models.parser_model import File
 
 def parse_path(root_path: str):
     filesObj: list[File] = []
+    errors: list[dict] = []
 
     for root, dirs, files in os.walk(root_path):
-        
         dirs[:] = [d for d in dirs if d not in SKIP_LIST]
 
         for file in files:
@@ -19,11 +19,12 @@ def parse_path(root_path: str):
 
             try:
                 parsed = parse_file(full_path, ext)
+                filesObj.append(parsed)
             except Exception as e:
-                parsed = {
+                errors.append({
+                    "file": full_path,
                     "error": str(e)
-                }
+                })
 
-            filesObj.append(parsed)
+    return filesObj, errors
 
-    return filesObj

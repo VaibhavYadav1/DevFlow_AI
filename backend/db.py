@@ -74,7 +74,11 @@ async def save_docs_summary(app, parsed_id):
         "content": project_doc
     }
 
-    await app.mongodb.documentation.insert_one(docs)
+    await app.mongodb.documentation.update_one(
+        {"parsed_id": str(parsed_id)},
+        {"$set": docs},
+        upsert=True
+    )
 
     return docs
 
@@ -94,6 +98,19 @@ async def save_diagram_summary(app, parsed_id):
         "content": diagram_json
     }
 
-    await app.mongodb.diagram.insert_one(docs)
+    await app.mongodb.diagram.update_one(
+        {"parsed_id": str(parsed_id)},
+        {"$set": docs},
+        upsert=True
+    )
 
     return docs
+
+async def get_all_projects(app) -> list:
+    cursor = app.mongodb.parsed_results.find({}, {"project_name": 1, "total_files": 1, "root_path": 1})
+    projects = await cursor.to_list(length=100)
+    
+    for project in projects:
+        project["_id"] = str(project["_id"])
+        
+    return projects

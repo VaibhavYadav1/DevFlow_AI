@@ -18,21 +18,11 @@ Generate a well-structured Markdown document using the exact format below:
     Mention modular structure
 
 3. Key components
-    Use bullet lists grouped by layer:
-
-    a. Frontend
-
-      Component names
-
-      Responsibilities
-
-    b. Backend
-
-      Controllers
-
-      Services
-
-      APIs
+    Present this as a Markdown table with columns: Component, Type (Controller/Service/Widget/etc), and Responsibility.
+    
+    | Component | Type | Responsibility |
+    | --------- | ---- | -------------- |
+    | ...       | ...  | ...            |
 
 4. Database / Storage
 

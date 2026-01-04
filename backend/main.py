@@ -71,7 +71,7 @@ async def _bg_parse_repo(app, task_id, project_name, zip_path):
             "status": "progress"
         })
 
-        file_models = parse_path(extract_path)
+        file_models, parse_errors = parse_path(extract_path)
 
         parsed_model = ParserModel(
             project_name=project_name,
@@ -95,21 +95,24 @@ async def _bg_parse_repo(app, task_id, project_name, zip_path):
         })
         
 @app.post("/upload-zip")
-async def upload_zip_file(background_task: BackgroundTasks, file: UploadFile = File(...), project_name: str = Form(...)) -> None:
+async def upload_zip_file(
+    request: Request,
+    background_task: BackgroundTasks,
+    file: UploadFile = File(...),
+    project_name: str | None = Form(None)   # 👈 from FormData
+) -> None:
 
     filename = file.filename
 
     if not filename.endswith(".zip"):
         raise HTTPException(status_code=400, detail="Only .zip files accepted")
-    
+
     if project_name is None:
         project_name = f"project-{uuid4().hex[:8]}"
 
-    project_name = project_name
-
     save_dir = os.path.join("upload", project_name)
-
     os.makedirs(save_dir, exist_ok=True)
+
     zip_path = os.path.join(save_dir, filename)
 
     # save zip file to local storage
@@ -121,15 +124,21 @@ async def upload_zip_file(background_task: BackgroundTasks, file: UploadFile = F
         "project_name": project_name,
         "progress": 0,
         "status": "pending"
-    } 
+    }
 
     task_id = await insert_task_record(app, task_json)
 
-    background_task.add_task(_bg_parse_repo, app, task_id, project_name, zip_path)
+    background_task.add_task(
+        _bg_parse_repo,
+        app,
+        task_id,
+        project_name,
+        zip_path
+    )
 
     return {
-        "message":"accepted",
-        "project_name":project_name,
+        "message": "accepted",
+        "project_name": project_name,
         "task_id": task_id
     }
 
@@ -161,3 +170,8 @@ async def getDocumentation(parsed_id: str):
 async def getDiagram(parsed_id: str):
     
     return await save_diagram_summary(app, parsed_id)
+
+@app.get("/projects")
+async def list_projects():
+    from db import get_all_projects
+    return await get_all_projects(app)

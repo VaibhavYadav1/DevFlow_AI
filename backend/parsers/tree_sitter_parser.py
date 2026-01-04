@@ -19,7 +19,8 @@ def parse_tree_sitter(code, language, file_path):
 
     def walk(node):
 
-        if node.type in ("function_declaration", "method_declaration"):
+        # Function / Method types
+        if node.type in ("function_declaration", "method_declaration", "function_definition"):
 
             fn_text = node.text.decode()
             fn_name = fn_text.split("(")[0].split()[-1]
@@ -29,7 +30,7 @@ def parse_tree_sitter(code, language, file_path):
 
             for child in node.children:
                 # decorator / annotation detection
-                if child.type in ("annotation", "decorator"):
+                if child.type in ("annotation", "decorator", "metadata"):
                     deco_text = child.text.decode().lower()
 
                     for m in HTTP_METHODS:
@@ -39,23 +40,40 @@ def parse_tree_sitter(code, language, file_path):
                                 "function": fn_name,
                                 "method": m.upper()
                             })
-
+            
+            # Dart/Flutter Logic: Check class context or naming if inside class
+            # (Simplified logic since 'walk' is recursive but doesn't pass parent context easily here without modification)
+            
             if is_controller:
                 controller_functions.append(fn_name)
             else:
                 service_functions.append(fn_name)
 
-        if node.type == "class_declaration":
+        # Class types (class_declaration is common, class_definition for some grammars)
+        if node.type in ("class_declaration", "class_definition"):
 
             cls_text = node.text.decode()
-            cls_name = cls_text.split("{")[0].split()[-1]
+            
+            # Simple split might fail on complex headers, but works for general case
+            # Dart: class MyClass ...
+            parts = cls_text.split("{")[0].split()
+            # Find the word after 'class'
+            try:
+                class_idx = parts.index("class")
+                cls_name = parts[class_idx + 1]
+            except ValueError:
+                cls_name = parts[-1] # Fallback
 
             classes.append(cls_name)
 
+            # Heuristic for Dart/FWs: Naming convention
             if "service" in cls_name.lower():
                 service_classes.append(cls_name)
+            if "controller" in cls_name.lower() or "bloc" in cls_name.lower() or "cubit" in cls_name.lower():
+                 # Treat Bloc/Cubit as controllers for architectural summary
+                pass 
 
-        if node.type in ("import_statement", "import_declaration"):
+        if node.type in ("import_statement", "import_declaration", "import_directive", "part_directive", "export_directive", "library_directive", "library_import"):
             imports.append(node.text.decode())
 
         # Walk children

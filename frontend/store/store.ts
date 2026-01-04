@@ -1,6 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import TodoReducer from "./features/fileSlice"
+import fileReducer from "./features/fileSlice"
 
 export const store = configureStore({
-    reducer: TodoReducer
+    reducer: {
+        file: fileReducer
+    }
 })
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

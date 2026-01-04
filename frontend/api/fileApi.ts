@@ -62,3 +62,10 @@ export async function getDiagram(parsedId: string) {
     return res.json();
 
 }
+
+export async function getProjects() {
+    const res = await fetch(`${BASE_URL}/projects`, {
+        method: "GET",
+    });
+    return res.json();
+}
