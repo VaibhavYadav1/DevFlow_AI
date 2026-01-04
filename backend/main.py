@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from utils.file_walker import safe_extract_zip
 from db import (
+    get_tasks,
     insert_task_record,
     update_task_status,
     insert_parsed_record,
@@ -56,6 +57,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.get("/all-project")
+async def get_all_tasks():
+    return await get_tasks(app)
+
 async def _bg_parse_repo(app, task_id, project_name, zip_path):
     try:
         extract_path = zip_path.replace(".zip", "")
@@ -90,7 +95,7 @@ async def _bg_parse_repo(app, task_id, project_name, zip_path):
         })
         
 @app.post("/upload-zip")
-async def upload_zip_file(request: Request, background_task: BackgroundTasks, file: UploadFile = File(...), project_name: str = Form(...)) -> None:
+async def upload_zip_file(background_task: BackgroundTasks, file: UploadFile = File(...), project_name: str = Form(...)) -> None:
 
     filename = file.filename
 

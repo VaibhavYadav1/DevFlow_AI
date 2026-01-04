@@ -1,5 +1,15 @@
 import { BASE_URL } from "./config"
 
+export async function getAllTasks() {
+
+    const res = await fetch(`${BASE_URL}/all-project`, {
+        method: "Get",
+    })
+
+    return res.json();
+
+}
+
 export async function uploadZip(projectName: string, file: File) {
     const formData = new FormData();
     formData.append("project_name", projectName.trim())

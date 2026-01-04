@@ -5,6 +5,17 @@ import json
 from llm.prompts import project_summary_prompt, mermaid_prompt
 from llm.client import call_llm
 
+async def get_tasks(app):
+    result = app.mongodb.tasks.find()
+
+    tasks = []
+
+    async for task in result:
+        task["_id"] = str(task["_id"])
+        tasks.append(task)
+
+    return tasks
+
 async def insert_task_record(app, task_data: dict) -> str:
     result = await app.mongodb.tasks.insert_one(task_data)
 

@@ -2,11 +2,13 @@
 
 import { getASTCode } from "@/api/fileApi";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { ASTProject } from "@/models/Tables";
 
-export default function AstCode() {
-    const parsed_id = useSelector((state: any) => state.parsed_id);
+export default function AstCode(
+    { parsed_id }: { parsed_id: any }
+) {
+    // const parsed_id = useSelector((state: any) => state.parsed_id);
     const [astObj, setAstObj] = useState<ASTProject | null>(null);
     const [copy, setCopy] = useState("Copy");
 

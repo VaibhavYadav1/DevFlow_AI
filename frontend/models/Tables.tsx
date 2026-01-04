@@ -1,3 +1,11 @@
+export interface Tasks {
+  _id: string;
+  project_name: string;
+  progress: number;
+  status: string;
+  parsed_id: string;
+}
+
 export interface ASTProject {
   project_name: string;
   root_path: string;

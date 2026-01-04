@@ -6,8 +6,6 @@ export default function uploadFilePage() {
     return (
         <>
             <UploadBox />
-            <ASTCode />
-
         </>
     );
 
