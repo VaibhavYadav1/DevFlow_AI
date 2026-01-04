@@ -32,3 +32,14 @@ export interface ASTService {
   classes: string[];
   functions: string[];
 }
+
+export interface Diagram {
+  _id: string;
+  parsed_id: string
+  content: Code
+}
+
+export interface Code {
+  class_diagram: string;
+  api_flow: string;
+}

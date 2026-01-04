@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 type SideBarItemType = {
     href: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     label: string;
 }
 

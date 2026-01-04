@@ -62,30 +62,28 @@ export default function Sidebar() {
                         </button>
 
                         {openProjects && (
-                            <div className="ml-6 mt-2 space-y-1">
+                            <ul className="ml-6 mt-2 space-y-1 list-none p-0">
                                 {projects.map((project) => (
-                                    <Link
-                                        key={project._id}
-                                        href={`/upload-file/${project.project_name}/${project.parsed_id}`}
-                                        className="block rounded-md px-3 py-1.5 text-gray-600 hover:bg-gray-100"
-                                    >
-                                        {project.project_name}
-                                    </Link>
+                                    <li key={project._id}>
+                                        <SideBarItem
+                                            href={`/upload-file/${project.project_name}/${project.parsed_id}`}
+                                            label={project.project_name}
+                                        />
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
                         )}
+
                     </div>
 
-                    {/* Documentation */}
                     <SideBarItem
-                        href="/documentation"
+                        href="/upload-file/documentation"
                         icon={<FileText size={18} />}
                         label="Documentation"
                     />
 
-                    {/* Diagrams */}
                     <SideBarItem
-                        href="/diagrams"
+                        href="/upload-file/diagram"
                         icon={<Share2 size={18} />}
                         label="Diagrams"
                     />

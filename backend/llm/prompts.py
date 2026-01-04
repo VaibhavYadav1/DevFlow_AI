@@ -67,28 +67,52 @@ generate UI-friendly summaries.
 
 def mermaid_prompt(parsed_result: dict) -> str:
     return f"""
-You are a code-to-diagram generator.
+You are a STRICT code-to-mermaid diagram generator.
 
 You are given parsed metadata of a software project:
 {parsed_result}
 
 Your task:
-Generate Mermaid diagrams that can be rendered directly by a Mermaid library.
+Generate Mermaid diagrams that can be rendered DIRECTLY by a Mermaid renderer
+WITHOUT any modification.
 
-Diagrams required:
-1. Class diagram
-2. API flow diagram (only if API routes exist; otherwise return an empty string)
+OUTPUT REQUIREMENTS:
+- Output ONLY valid JSON
+- Output NOTHING outside the JSON
+- Do NOT include explanations, comments, or markdown
+- Do NOT wrap diagrams in ``` or ```mermaid
+- Do NOT invent classes, methods, APIs, or relationships
+- Use ONLY information present in the parsed metadata
 
-STRICT RULES:
-- Do NOT use Markdown
-- Do NOT wrap output in ```mermaid or ```
-- Do NOT include explanations or comments
-- Each diagram value MUST be a valid Mermaid definition starting with:
-  - classDiagram
-  - sequenceDiagram OR flowchart TD
-- Mermaid code must be directly renderable without modification
+DIAGRAM RULES:
 
-Return EXACTLY this JSON structure and nothing else:
+CLASS DIAGRAM:
+- Start with exactly: classDiagram
+- Each class must use this syntax:
+  class ClassName {{
+    +methodName()
+  }}
+- Include ONLY public methods (+)
+- Add relationships ONLY if clearly implied by usage/imports
+- Prefer simple associations (-->)
+- Avoid inheritance unless explicitly present
+
+API FLOW DIAGRAM:
+- Generate ONLY if API routes exist
+- Use sequenceDiagram OR flowchart TD
+- Start with exactly:
+  - sequenceDiagram
+  OR
+  - flowchart TD
+- If no API routes exist, return an empty string ""
+
+MERMAID VALIDATION RULES:
+- No duplicate class names
+- No invalid characters in class or method names
+- No trailing spaces or invalid indentation
+- Mermaid must compile without errors
+
+RETURN FORMAT (EXACT, NO VARIATIONS):
 
 {{
   "class_diagram": "<valid mermaid diagram or empty string>",
