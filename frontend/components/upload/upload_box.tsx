@@ -8,6 +8,7 @@ import { setParserID } from "@/store/features/fileSlice";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text_input";
 import FileUpload from "@/components/ui/file_upload";
+import AstCode from "../ast/ast_code";
 
 export default function UploadBox() {
     const dispatch = useDispatch();
@@ -17,6 +18,7 @@ export default function UploadBox() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [taskId, setTaskId] = useState("");
+    const [parserId, setParserId] = useState();
 
     const handleUpload = async () => {
         if (!file) return;
@@ -48,6 +50,8 @@ export default function UploadBox() {
                 const res = await getStatus(taskId);
 
                 if (res.parsed_id) {
+
+                    setParserId(res.parsed_id)
 
                     dispatch(setParserID(res.parsed_id));
                     setMessage("✅ File uploaded successfully. Go to the Documentation tab or Diagrams tab to view the generated output.");
@@ -101,6 +105,8 @@ export default function UploadBox() {
                     {message}
                 </p>
             )}
+
+            {parserId && <AstCode parsed_id={parserId} />}
 
         </div>
     );

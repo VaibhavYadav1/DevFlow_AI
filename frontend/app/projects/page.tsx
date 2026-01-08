@@ -91,10 +91,17 @@ export default function DocumentationPage() {
                             </div>
 
                             <Link
-                                href={`/projects/${project._id}`}
+                                href={`/documentation/${project._id}`}
                                 className="block w-full py-3 px-4 bg-slate-50 text-slate-600 text-center font-medium rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-300"
                             >
                                 View Documentation
+                            </Link>
+                            <br />
+                            <Link
+                                href={`/diagram/${project._id}`}
+                                className="block w-full py-3 px-4 text-center font-medium rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white transition-colors"
+                            >
+                                🧩 View Diagrams
                             </Link>
                         </div>
                     ))}

@@ -1,58 +1,62 @@
 def project_summary_prompt(parsed_result: dict) -> str:
     return f"""
-You are a senior software architect.
+You are an expert Senior Software Architect and Technical Writer.
+Your task is to analyze the provided project metadata and generate a comprehensive, professional, and descriptive project summary report.
 
-Given this parsed project metadata:
+**Input Metadata:**
 {parsed_result}
 
-Generate a well-structured Markdown document using the exact format below:
+**Output Guidelines:**
+- **STRICT MARKDOWN ONLY**: Do NOT use HTML tags.
+- **Headers**: ALWAYS use `##` for main numbered sections AND bold the text (e.g., `## **1. Section Name**`) to ensure visibility.
+- **Lists over Tables**: Use bullet points for descriptive sections.
+- **Code Blocks**: Use ```text for directory trees.
+- **Clarity**: distinct sections, clear spacing.
 
-1. Project Overview
-    Brief description (3–4 bullet points)
-    What problem the project solves
-    Who it is for
+**Required Report Structure:**
 
-2. Architecture explanation
-    High-level architecture (bullet points)
-    Explain data flow (Controller → Service → Database if applicable)
-    Mention modular structure
+# Project Deep-Dive Analysis
 
-3. Key components
-    Present this as a Markdown table with columns: Component, Type (Controller/Service/Widget/etc), and Responsibility.
-    
-    | Component | Type | Responsibility |
-    | --------- | ---- | -------------- |
-    | ...       | ...  | ...            |
+## **1. Executive Summary**
+*Provide a high-level overview using bullet points.*
+- **Project Scope**: A clear, detailed description of the project's purpose and goals.
+- **Target Audience**: Who is this built for?
+- **Core Value Proposition**: What makes it unique?
 
-4. Database / Storage
+## **2. Technical Architecture**
+*Explain the system design.*
+- **Architectural Pattern**: (e.g., MVC, Microservices) and its implementation here.
+- **Data Flow**: Step-by-step flow from user action to database.
+- **Codebase Structure**:
+    - Explain the logical grouping of folders.
 
-    Databases used
+## **3. Technology Stack Breakdown**
+*Use a Markdown table for clarity.*
 
-    Purpose
+| Category | Technologies | Function/Responsibility |
+| :--- | :--- | :--- |
+| **Frontend** | ... | ... |
+| **Backend** | ... | ... |
+| **Database** | ... | ... |
+| **Key Tools** | ... | ... |
 
-4. Tech stack summary
-Present this as a Markdown table:
-| Layer    | Technology |
-| -------- | ---------- |
-| Frontend |            |
-| Backend  |            |
-| Database |            |
-| Tools    |            |
+## **4. Key Components**
+*Highlight the most important files/modules.*
 
+| Component | Type | Responsibility |
+| :--- | :--- | :--- |
+| ... | ... | ... |
 
-- Headings → rendered as sections
-- Bullet points → clean spacing
-- Tables → structured visual layout
-- Short content blocks → readable cards in UI
-- Strict rules → no wall-of-text output
+## **5. Data Management**
+- **Storage**: Databases or storage methods used.
+- **Schema**: Brief overview of key data models.
 
-This is exactly how tools like:
-- GitHub Copilot Docs
-- Sourcegraph Cody
-- IDE explainers
+## **6. API & Interfaces (If Applicable)**
+- **Protocol**: (REST/GraphQL/etc.)
+- **Key Endpoints**: Summary of main routes.
 
-generate UI-friendly summaries.
-
+## **7. Conclusion & Maintainability**
+- Assessment of code quality, modularity, and future scalability.
 """
 
 def mermaid_prompt(parsed_result: dict) -> str:

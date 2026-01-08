@@ -59,52 +59,106 @@ async def get_parsed_data(app, parsed_id: str):
 
 async def save_docs_summary(app, parsed_id):
 
+    # 1️⃣ Check junction collection first
+    junction = await app.mongodb.documentation_junction.find_one(
+        {"parsed_id": parsed_id}
+    )
+
+    if junction and junction.get("document_id"):
+        # 2️⃣ If document already exists, return it
+        existing_doc = await app.mongodb.documentation.find_one(
+            {"_id": junction["document_id"]}
+        )
+
+        if existing_doc:
+            existing_doc["_id"] = str(existing_doc["_id"])
+            return existing_doc
+
+    # 3️⃣ If not found → call LLM
     getASTData = await get_parsed_data(app, parsed_id)
 
-    # Project summary
     project_prompt = project_summary_prompt(getASTData)
-    
     project_doc = call_llm(project_prompt)
 
     if not isinstance(project_doc, str):
         project_doc = str(project_doc)
 
-    docs = {
-        "parsed_id": str(parsed_id),
+    # 4️⃣ Save documentation
+    doc_result = await app.mongodb.documentation.insert_one({
+        "parsed_id": parsed_id,
         "content": project_doc
-    }
+    })
 
-    await app.mongodb.documentation.update_one(
-        {"parsed_id": str(parsed_id)},
-        {"$set": docs},
+    document_id = doc_result.inserted_id
+
+     # 5️⃣ Update / create junction entry
+    await app.mongodb.documentation_junction.update_one(
+        {"parsed_id": parsed_id},
+        {
+            "$set": {
+                "parsed_id": parsed_id,
+                "document_id": document_id
+            }
+        },
         upsert=True
     )
 
-    return docs
+    return {
+        "_id": str(document_id),
+        "parsed_id": parsed_id,
+        "content": project_doc
+    }
 
 async def save_diagram_summary(app, parsed_id):
 
-    getASTData = await get_parsed_data(app, parsed_id)
-    
-    # Project summary
-    project_prompt = mermaid_prompt(getASTData)
+    # 1️⃣ Check junction collection first
+    junction = await app.mongodb.documentation_junction.find_one(
+        {"parsed_id": parsed_id}
+    )
 
+    if junction and junction.get("diagram_id"):
+        existing_diagram = await app.mongodb.diagram.find_one(
+            {"_id": junction["diagram_id"]}
+        )
+
+        if existing_diagram:
+            existing_diagram["_id"] = str(existing_diagram["_id"])
+            return existing_diagram
+
+    # 2️⃣ Diagram not found → call LLM
+    getASTData = await get_parsed_data(app, parsed_id)
+
+    project_prompt = mermaid_prompt(getASTData)
     llm_output = call_llm(project_prompt)
 
     diagram_json = json.loads(llm_output)
 
     docs = {
-        "parsed_id": str(parsed_id),
+        "parsed_id": parsed_id,
         "content": diagram_json
     }
 
-    await app.mongodb.diagram.update_one(
-        {"parsed_id": str(parsed_id)},
-        {"$set": docs},
+    # 3️⃣ Save diagram
+    result = await app.mongodb.diagram.insert_one(docs)
+    diagram_id = result.inserted_id
+
+    # 4️⃣ Update / create junction entry
+    await app.mongodb.documentation_junction.update_one(
+        {"parsed_id": parsed_id},
+        {
+            "$set": {
+                "parsed_id": parsed_id,
+                "diagram_id": diagram_id
+            }
+        },
         upsert=True
     )
 
-    return docs
+    return {
+        "_id": str(diagram_id),
+        "parsed_id": parsed_id,
+        "content": diagram_json
+    }
 
 async def get_all_projects(app) -> list:
     cursor = app.mongodb.parsed_results.find({}, {"project_name": 1, "total_files": 1, "root_path": 1})

@@ -7,7 +7,7 @@ export default function uploadFilePage() {
     return (
         <>
             <UploadBox />
-            <ProjectSummary />
+            {/* <ProjectSummary /> */}
         </>
     );
 
