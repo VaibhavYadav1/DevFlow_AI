@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, Request, Form
+from fastapi.responses import FileResponse
 from uuid import uuid4
 import os
 import aiofiles
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
 from utils.file_walker import safe_extract_zip
+from utils.doc_generator import generate_project_documents
 from db import (
     get_tasks,
     insert_task_record,
@@ -87,6 +89,30 @@ async def _bg_parse_repo(app, task_id, project_name, zip_path):
             "status": "completed",
             "parsed_id": parsed_id
         })
+
+        # --- Generate Documentation & Diagrams ---
+        try:
+            # 1. Fetch/Generate Summary
+            summary_data = await save_docs_summary(app, parsed_id)
+            summary_content = summary_data.get("content", "")
+
+            # 2. Fetch/Generate Diagrams
+            diagram_data = await save_diagram_summary(app, parsed_id)
+            diagram_content = diagram_data.get("content", {})
+
+            # 3. Generate Files
+            # extract_path is like "upload/project_name/file_extracted" or just "upload/project_name" depending on zip structure.
+            # But the requirement says "whenever a zip file is uploaded".
+            # The zip_path is "upload/project_name/filename.zip". 
+            # So let's save the docs in "upload/project_name/" (which is `os.path.dirname(zip_path)`).
+            output_dir = os.path.dirname(zip_path)
+            
+            # Run in a threadpool since it involves blocking IO (pdf/docx gen)
+            generate_project_documents(summary_content, diagram_content, output_dir)
+            
+        except Exception as doc_err:
+            print(f"⚠️ Error generating project documents: {doc_err}")
+
 
     except Exception as e:
         await update_task_status(app, task_id, {
@@ -170,6 +196,49 @@ async def getDocumentation(parsed_id: str):
 async def getDiagram(parsed_id: str):
     
     return await save_diagram_summary(app, parsed_id)
+
+@app.get("/download/{parsed_id}")
+async def download_file(parsed_id: str):
+    # 1. Get project info
+    parsed_record = await get_parsed_data(app, parsed_id)
+    if not parsed_record:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    project_name = parsed_record.get("project_name")
+    if not project_name:
+        raise HTTPException(status_code=404, detail="Project Name not found")
+
+    # 2. Construct path
+    # Assuming files are in upload/{project_name}/project_summary.pdf
+    # Ideally should use root_path but let's stick to convention used in upload
+    pdf_path = os.path.join("upload", project_name, "project_summary.pdf")
+    
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail="Summary file not generated yet")
+
+    return FileResponse(pdf_path, media_type="application/pdf", filename=f"{project_name}_summary.pdf")
+
+
+@app.get("/download_docx/{parsed_id}")
+async def download_docx_file(parsed_id: str):
+    # 1. Get project info
+    parsed_record = await get_parsed_data(app, parsed_id)
+    if not parsed_record:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    project_name = parsed_record.get("project_name")
+    if not project_name:
+        raise HTTPException(status_code=404, detail="Project Name not found")
+
+    # 2. Construct path
+    docx_path = os.path.join("upload", project_name, "project_summary.docx")
+    
+    if not os.path.exists(docx_path):
+        raise HTTPException(status_code=404, detail="Summary file not generated yet")
+
+    return FileResponse(docx_path, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename=f"{project_name}_summary.docx")
+
+
 
 @app.get("/projects")
 async def list_projects():

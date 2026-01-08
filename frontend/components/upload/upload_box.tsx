@@ -1,5 +1,8 @@
 "use client";
 
+import { createElement } from "react";
+import { BASE_URL } from "@/api/config";
+
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { uploadZip, getStatus } from "@/api/fileApi";
@@ -105,6 +108,30 @@ export default function UploadBox() {
                     {message}
                 </p>
             )}
+
+            {parserId && (
+                <div className="mt-4 flex justify-center gap-4">
+
+                    <a
+                        href={`${BASE_URL}/download/${parserId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                        📄 Download PDF
+                    </a>
+
+                    <a
+                        href={`${BASE_URL}/download_docx/${parserId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        📝 Download DOCX
+                    </a>
+                </div>
+            )}
+
 
             {parserId && <AstCode parsed_id={parserId} />}
 
